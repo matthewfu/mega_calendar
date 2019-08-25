@@ -15,6 +15,18 @@
       <td><label><%= translate 'end' %></label></td>
       <td><%= @holiday.end.blank? ? '' : @holiday.end.to_date.to_s %></td>
     </tr>
+    <tr>
+      <td><label><%= translate 'reason' %></label></td>
+      <td><%= @holiday.reason.blank? ? '' : @holiday.reason %></td>
+    </tr>
+    <tr>
+      <td><label><%= translate 'note' %></label></td>
+      <td><%= @holiday.note.blank? ? '' : @holiday.note %></td>
+    </tr>
+    <tr>
+      <td><label><%= translate 'is_public' %></label></td>
+      <td><%= @holiday.is_public ? 'Yes' : 'No' %></td>
+    </tr>
   </table>
 <a href="<%= Setting.plugin_mega_calendar['sub_path'] %>holidays/edit?id=<%= @holiday.id.to_s %>"><%= translate 'edit' %></a>
 <a href="<%= Setting.plugin_mega_calendar['sub_path'] %>holidays/destroy?id=<%= @holiday.id.to_s %>"><%= translate 'destroy' %></a>

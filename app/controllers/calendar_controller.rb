@@ -125,6 +125,46 @@ class CalendarController < ApplicationController
   end
 
   def form_holiday(holiday)
+    if holiday.is_public
+      render_tooltip_for_public_holiday(holiday)
+    elsif holiday.is_public == false
+      render_tooltip_for_user_holiday(holiday)
+    end
+  end
+
+  def render_tooltip_for_public_holiday(holiday)
+    ret_var = '<table>'
+    ret_var << '<tr>'
+    ret_var << '<td colspan="2">公共事件</td>'
+    ret_var << '</tr>'
+
+    if holiday.reason
+      ret_var << '<tr>'
+      ret_var << '<td>' + (translate 'reason') + '</td>'
+      ret_var << '<td>' + holiday.reason + '</td>' rescue '<td></td>'
+      ret_var << '</tr>'      
+    end
+
+    ret_var << '<tr>'
+    ret_var << '<td>' + (translate 'start') + '</td>'
+    ret_var << '<td>' + holiday.start.to_date.to_s + '</td>' rescue '<td></td>'
+    ret_var << '</tr>'
+    ret_var << '<tr>'
+    ret_var << '<td>' + (translate 'end') + '</td>'
+    ret_var << '<td>' + holiday.end.to_date.to_s + '</td>' rescue '<td></td>'
+    ret_var << '</tr>'
+
+    if holiday.note
+      ret_var << '<tr>'
+      ret_var << '<td>' + (translate 'note') + '</td>'
+      ret_var << '<td>' + holiday.note + '</td>' rescue '<td></td>'
+      ret_var << '</tr>'
+    end
+    ret_var << '</table>'
+    return ret_var
+  end
+
+  def render_tooltip_for_user_holiday(holiday)
     ret_var = '<table>'
     ret_var << '<tr>'
     ret_var << '<td>' + (translate 'user') + '</td>'
@@ -138,9 +178,18 @@ class CalendarController < ApplicationController
     ret_var << '<td>' + (translate 'end') + '</td>'
     ret_var << '<td>' + holiday.end.to_date.to_s + '</td>' rescue '<td></td>'
     ret_var << '</tr>'
+    ret_var << '<tr>'
+    ret_var << '<td>' + (translate 'reason') + '</td>'
+    ret_var << '<td>' + holiday.reason + '</td>' rescue '<td></td>'
+    ret_var << '</tr>'
+    ret_var << '<tr>'
+    ret_var << '<td>' + (translate 'note') + '</td>'
+    ret_var << '<td>' + holiday.note + '</td>' rescue '<td></td>'
+    ret_var << '</tr>'
     ret_var << '</table>'
     return ret_var
   end
+
   def form_issue(issue)
     ticket_time = TicketTime.where({:issue_id => issue.id}).first rescue nil
     tbegin = ticket_time.time_begin.strftime(" %H:%M") rescue ''
@@ -210,7 +259,7 @@ class CalendarController < ApplicationController
     @events = []
     def_holiday = '#' + Setting.plugin_mega_calendar['default_holiday_color']
     def_color = '#' + Setting.plugin_mega_calendar['default_event_color']
-    @events = @events + holidays.collect {|h| {:id => h.id.to_s, :controller_name => 'holiday', :title => (h.user.blank? ? '' : h.user.login + ' - ') + (translate 'holiday'), :start => h.start.to_date.to_s, :end => (h.end + 1.day).to_date.to_s, :allDay => true, :color => def_holiday, :url => Setting.plugin_mega_calendar['sub_path'] + 'holidays/show?id=' + h.id.to_s, :className => 'calendar_event', :description => form_holiday(h) }}
+    @events = @events + holidays.collect {|h| {:id => h.id.to_s, :controller_name => 'holiday', :title => h.get_show_title , :start => h.start.to_date.to_s, :end => (h.end + 1.day).to_date.to_s, :allDay => true, :color => def_holiday, :url => Setting.plugin_mega_calendar['sub_path'] + 'holidays/show?id=' + h.id.to_s, :className => 'calendar_event', :description => form_holiday(h) }}
     issues = issues + issues2 + issues3 + issues4
     issues = issues.compact.uniq
     issues.each do |i|

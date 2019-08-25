@@ -1,13 +1,35 @@
 class Holiday < ActiveRecord::Base
+  include Redmine::I18n
+
   unloadable
   attr_accessible :user_id
   attr_accessible :start
   attr_accessible :end
+  attr_accessible :note
+  attr_accessible :reason
   belongs_to(:user)
   validates :start, :date => true
   validates :end, :date => true
   validates_presence_of :start, :end
   validate :validate_holiday
+  before_save :update_is_public
+
+  def get_show_title
+    result = if is_public
+      title = "[公]#{reason}"
+      title << "- (詳見備註)" if note.present?
+      title
+    elsif is_public == false
+      (user.blank? ? '' : user.login + ' - ') + ("請假")
+    else
+      "ERR"
+    end
+    result
+  end
+
+  def update_is_public
+    self[:is_public] = true if self[:user_id].nil?
+  end
 
   def validate_holiday
     if self.start && self.end && (start_changed? || end_changed?) && self.end < self.start
