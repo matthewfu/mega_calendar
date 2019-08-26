@@ -20,7 +20,7 @@ class Holiday < ActiveRecord::Base
       title << "- (詳見備註)" if note.present?
       title
     elsif is_public == false
-      (user.blank? ? '' : user.login + ' - ') + ("請假")
+      (user.blank? ? '' : user.lastname + ' - ') + ("請假")
     else
       "ERR"
     end
